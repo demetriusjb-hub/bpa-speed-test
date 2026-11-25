@@ -1,0 +1,28 @@
+name: Transcribe whole episodes
+# Free GitHub runners do the work; no Claude session is involved. Start it with the green "Run workflow" button on the Actions tab.
+on:
+  workflow_dispatch:
+    inputs:
+      runners:
+        description: "How many runners to use (the matrix below is fixed at 5; extra ones exit when no batch is free)"
+        default: "5"
+permissions:
+  contents: write
+jobs:
+  transcribe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [1, 2, 3, 4, 5]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Transcribe (claims the next free batches by itself)
+        run: python run_batch.py --auto --max-minutes 330 --threads 4
